@@ -7,7 +7,7 @@ import torch.optim as optim
 from torchvision import datasets
 
 from model_factory import ModelFactory
-
+import wandb
 
 def opts() -> argparse.ArgumentParser:
     """Option Handling Function."""
@@ -43,7 +43,7 @@ def opts() -> argparse.ArgumentParser:
     parser.add_argument(
         "--lr",
         type=float,
-        default=0.1,
+        default=0.01,
         metavar="LR",
         help="learning rate (default: 0.01)",
     )
@@ -89,6 +89,7 @@ def train(
     use_cuda: bool,
     epoch: int,
     args: argparse.ArgumentParser,
+    wandb: wandb
 ) -> None:
     """Default Training Loop.
 
@@ -130,12 +131,18 @@ def train(
             100.0 * correct / len(train_loader.dataset),
         )
     )
+    wandb.log({"train_accuracy": 100.0 * correct / len(train_loader.dataset)})
+    wandb.log({"train_loss": loss.data.item()})
+    wandb.log({"epoch": epoch})
+    wandb.log({"learning_rate": args.lr})
+    wandb.log({"batch_size": args.batch_size})
 
 
 def validation(
     model: nn.Module,
     val_loader: torch.utils.data.DataLoader,
     use_cuda: bool,
+    wandb: wandb,
 ) -> float:
     """Default Validation Loop.
 
@@ -170,6 +177,8 @@ def validation(
             100.0 * correct / len(val_loader.dataset),
         )
     )
+    wandb.log({"validation_accuracy": 100.0 * correct / len(val_loader.dataset)})
+    wandb.log({"validation_loss": validation_loss})
     return validation_loss
 
 
@@ -177,7 +186,12 @@ def main():
     """Default Main Function."""
     # options
     args = opts()
-
+    wandb.init(project="my-resnet-project", name=args.model_name, config={
+    # "learning_rate": 0.001,
+    # "batch_size": 32,
+    "epochs": 10,
+    "nclasses": 500
+    })
     # Check if cuda is available
     use_cuda = torch.cuda.is_available()
 
@@ -217,9 +231,9 @@ def main():
     best_val_loss = 1e8
     for epoch in range(1, args.epochs + 1):
         # training loop
-        train(model, optimizer, train_loader, use_cuda, epoch, args)
+        train(model, optimizer, train_loader, use_cuda, epoch, args, wandb)
         # validation loop
-        val_loss = validation(model, val_loader, use_cuda)
+        val_loss = validation(model, val_loader, use_cuda, wandb)
         if val_loss < best_val_loss:
             # save the best model for validation
             best_val_loss = val_loss
