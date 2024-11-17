@@ -15,7 +15,7 @@ def opts() -> argparse.ArgumentParser:
     parser.add_argument(
         "--data",
         type=str,
-        default="data_sketches",
+        default="sketch_recvis2024/sketch_recvis2024",
         metavar="D",
         help="folder where data is located. train_images/ and val_images/ need to be found in the folder",
     )
@@ -203,7 +203,7 @@ def main():
         os.makedirs(args.experiment)
 
     # load model and transform
-    model, data_transforms = ModelFactory(args.model_name).get_all()
+    model, train_data_transforms, val_data_tranforms = ModelFactory(args.model_name).get_all()
     if use_cuda:
         print("Using GPU")
         model.cuda()
@@ -212,13 +212,13 @@ def main():
 
     # Data initialization and loading
     train_loader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(args.data + "/train_images", transform=data_transforms),
+        datasets.ImageFolder(args.data + "/train_images", transform=train_data_transforms),
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=args.num_workers,
     )
     val_loader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(args.data + "/val_images", transform=data_transforms),
+        datasets.ImageFolder(args.data + "/val_images", transform=val_data_transforms),
         batch_size=args.batch_size,
         shuffle=False,
         num_workers=args.num_workers,

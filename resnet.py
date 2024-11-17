@@ -6,9 +6,9 @@ import torchvision.models as models
 nclasses = 500  # Number of output classes
 
 
-class Net(nn.Module):
+class ResnetClf(nn.Module):
     def __init__(self):
-        super(Net, self).__init__()
+        super(ResnetClf, self).__init__()
         # Load a pre-trained ResNet model (e.g., ResNet-50)
         self.resnet = models.resnet50(pretrained=True)
         # keep resnet features frozen
