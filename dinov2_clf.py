@@ -18,7 +18,16 @@ class Dinov2CLF(nn.Module):
         # Replace the fully connected (fc) layer to match the number of classes
         # DINO's fc input features can be accessed as self.resnet.head.in_features
         in_features = self.dinov2_clf.norm.normalized_shape[0]
-        self.dinov2_clf.head = nn.Linear(in_features, nclasses)
+        linear_clf = nn.Sequential(
+            nn.Linear(in_features, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 512),
+            nn.ReLU(),
+            nn.Linear(512, nclasses)
+        )
+        self.dinov2_clf.head = linear_clf
+        # self.dinov2_clf.head = nn.Linear(in_features, nclasses)
+
 
     def forward(self, x):
         # Forward pass through ResNet

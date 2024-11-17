@@ -3,20 +3,20 @@
 from data import data_transforms, resnet_transforms, data_aug_transforms
 from model import Net
 from resnet import ResnetClf
-
+from dinov2_clf import Dinov2CLF
 
 class ModelFactory:
     def __init__(self, model_name: str):
         self.model_name = model_name
         self.model = self.init_model()
-        self.transform = self.init_transform()
+        self.train_transform, self.val_transform = self.init_transform()
 
     def init_model(self):
         if self.model_name == "basic_cnn":
             return Net()
         elif self.model_name == "resnet":
             return ResnetClf()
-        elif self.model_name == "dinov2_clf":
+        elif self.model_name == "dinov2" or self.model_name == "dinov2_aug":
             return Dinov2CLF()
         else:
             raise NotImplementedError("Model not implemented")
@@ -35,7 +35,7 @@ class ModelFactory:
         return self.model
 
     def get_transform(self):
-        return self.transform
+        return self.train_transform, self.val_transform
 
     def get_all(self):
-        return self.model, self.transform
+        return self.model, self.train_transform, self.val_transform
