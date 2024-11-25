@@ -9,13 +9,12 @@ nclasses = 500  # Number of output classes
 class ResnetClf(nn.Module):
     def __init__(self):
         super(ResnetClf, self).__init__()
-        # Load a pre-trained ResNet model (e.g., ResNet-50)
+        # Load a pre-trained ResNet model
         self.resnet = models.resnet50(pretrained=True)
         # keep resnet features frozen
         for param in self.resnet.parameters():
             param.requires_grad = False
-        # Replace the fully connected (fc) layer to match the number of classes
-        # ResNet's fc input features can be accessed as self.resnet.fc.in_features
+        # add a linear layer on top
         self.resnet.fc = nn.Linear(self.resnet.fc.in_features, nclasses)
 
     def forward(self, x):

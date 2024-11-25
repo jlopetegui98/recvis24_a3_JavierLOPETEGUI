@@ -22,7 +22,7 @@ def opts() -> argparse.ArgumentParser:
     parser.add_argument(
         "--model_name",
         type=str,
-        default="basic_cnn",
+        default="dinov2",
         metavar="MOD",
         help="Name of the model for model and transform instantiation",
     )
@@ -77,6 +77,41 @@ def opts() -> argparse.ArgumentParser:
         default=10,
         metavar="NW",
         help="number of workers for data loading",
+    )
+    parser.add_argument(
+        "--aug_flag",
+        type=bool,
+        default=False,
+        metavar="AF",
+        help="whether to use data augmentation or not",
+    )
+    parser.add_argument(
+        "--frozen_strategy",
+        type=str,
+        default="all",
+        metavar="FS",
+        help="frozen strategy for Dinov2 model",
+    )
+    parser.add_argument(
+        "--weight_path",
+        type=str,
+        default="facebook/dinov2-giant",
+        metavar="WP",
+        help="weight path for Dinov2 model",
+    )
+    parser.add_argument(
+        "--dropout",
+        type=float,
+        default=0.0,
+        metavar="D",
+        help="dropout rate for Dinov2 model",
+    )
+    parser.add_argument(
+        "--embedding_strategy",
+        type=str,
+        default="cls+seq_emb",
+        metavar="ES",
+        help="embedding strategy for Dinov2 model",
     )
     args = parser.parse_args()
     return args
@@ -203,7 +238,7 @@ def main():
         os.makedirs(args.experiment)
 
     # load model and transform
-    model, train_data_transforms, val_data_transforms = ModelFactory(args.model_name).get_all()
+    model, train_data_transforms, val_data_transforms = ModelFactory(args.model_name, args.weight_path, args.dropout, args.frozen_strategy, args.aug_flag, args.embedding_strategy).get_all()
     if use_cuda:
         print("Using GPU")
         model.cuda()
