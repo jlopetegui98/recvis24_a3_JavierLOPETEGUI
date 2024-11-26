@@ -1,5 +1,8 @@
 ## Object recognition and computer vision 2024/2025
 
+Javier Alejandro LOPETEGUI GONZALEZ
+*This repository is mainly based on the one provided with the orientation of the assigment*
+
 ### Assignment 3: Sketch image classification
 [![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1PxshEMwNm4tLu8f_Bz_Z0emUlC1TPob4?usp=sharing)
 #### Requirements
@@ -16,13 +19,29 @@ We will be using a dataset containing 500 different classes of sketches adapted 
 Download the training/validation/test images from [here](https://www.kaggle.com/competitions/mva-recvis-2024/data). The test image labels are not provided.
 
 #### Training and validating your model
-Run the script `main.py` to train your model.
 
-Modify `main.py`, `model.py` and `data.py` for your assignment, with an aim to make the validation score better.
-
-- By default the images are loaded and resized to 64x64 pixels and normalized to zero-mean and standard deviation of 1. See data.py for the `data_transforms`.
-
-- When changing models, you should also add support for your model in the `ModelFactory` class in `model_factory.py`. This allows to not having to modify the evaluation script after the model has finished training.
+To run the training process you must download the dataset using the next commands (kaggle credentials required):
+```bash
+!kaggle competitions download -c mva-recvis-2024
+!unzip mva-recvis-2024.zip
+```
+Then, run the following line to run the solution which obtained the best public test accuracy in the challenge:
+```bash
+!python recvis24_a3/main.py --model_name dinov2
+```
+The main customization parameters added in my solution for the training are the following:
+- weight_path: Dinov2 version to use for feature extraction in the model. The default value will be "facebook/dinov2-giant". You can use also "facebook/dinov2-base" or "facebook/dinov2-large"
+- embedding_strategy: You can use on of the following approaches:
+  - "cls": Use the cls token embedding
+  - "seq_emb": Use the pooled average embedding (average over all the tokens)
+  - "cls+seq_emb": The concatenation of the two embeddings mentioned before. This will be the default value
+- frozen_strategy: For the freezing strategie:
+  - "none": do not freeze any parameter
+  - "all": freeze all feature extractor model parameters
+  - "n-1_attention": freeze all feature extractor model parameters but the last attention head
+- aug_flag: a boolean indicating wheter to use data augmentation or not (False as default value)
+- dropout: A float value between 0 and 1 indicating the level of dropout to apply after the feature extraction with the base model
+ 
 
 #### Evaluating your model on the test set
 
@@ -38,9 +57,12 @@ That generates a file `kaggle.csv` that you can upload to the private kaggle com
 
 #### Logger
 
-We recommend you use an online logger like [Weights and Biases](https://wandb.ai/site/experiment-tracking) to track your experiments. This allows to visualise and compare every experiment you run. In particular, it could come in handy if you use google colab as you might easily loose track of your experiments when your sessions ends.
+The training details for the approaches already tried are in the following wand report: [HW3_Report_JavierLOPETEGUI](https://api.wandb.ai/links/nlp-tasks/qr77to53)
 
-Note that currently, the code does not support such a logger. It should be pretty straightforward to set it up.
+### Report
+
+The report of the implementation is available in the file: [HW3_Report_JavierLOPETEGUI.pdf]()
+
 
 #### Acknowledgments
 Adapted from Rob Fergus and Soumith Chintala https://github.com/soumith/traffic-sign-detection-homework.<br/>
