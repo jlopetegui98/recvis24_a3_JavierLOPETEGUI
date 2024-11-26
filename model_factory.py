@@ -7,12 +7,13 @@ from dinov2_clf import Dinov2CLF
 class ModelFactory:
     def __init__(self, model_name: str, weight_path: str = "facebook/dinov2-giant", dropout: float = 0.0, frozen_strategy: str = "all", aug_flag: bool = False, embedding_strategy: str = "cls+seq_emb"):
         self.model_name = model_name
-        self.model = self.init_model()
-        self.train_transform, self.val_transform = self.init_transform(aug_flag)
         self.weight_path = weight_path
         self.dropout = dropout
         self.frozen_strategy = frozen_strategy
         self.embedding_strategy = embedding_strategy
+        self.aug_flag = aug_flag
+        self.model = self.init_model()
+        self.train_transform, self.val_transform = self.init_transform()
 
     def init_model(self):
         if self.model_name == "basic_cnn":
@@ -27,9 +28,9 @@ class ModelFactory:
     def init_transform(self):
         if self.model_name == "basic_cnn":
             return data_transforms, data_transforms
-        if (self.model_name == "resnet" or self.model_name == "dinov2") and not aug_flag:
+        if (self.model_name == "resnet" or self.model_name == "dinov2") and not self.aug_flag:
             return resnet_transforms, resnet_transforms
-        elif (self.model_name == "restnet" or self.model_name == "dinov2_aug") and aug_flag:
+        elif (self.model_name == "restnet" or self.model_name == "dinov2_aug") and self.aug_flag:
             return data_aug_transforms, resnet_transforms
         else:
             raise NotImplementedError("Transform not implemented")

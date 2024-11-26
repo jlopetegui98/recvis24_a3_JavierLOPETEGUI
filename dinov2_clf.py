@@ -6,7 +6,7 @@ from transformers import AutoModel
 class Dinov2CLF(nn.Module):
     def __init__(self, weight_path: str = "facebook/dinov2-giant", frozen_strategy: str = "all", nclasses: int = 500, dropout: float = 0.0, embedding_strategy: str = "cls+seq_emb"):
         super(Dinov2CLF, self).__init__()
-        
+        self.embedding_strategy = embedding_strategy
         # Load the pretrained DINOv2 model
         self.feature_extractor = AutoModel.from_pretrained(weight_path)
         
@@ -33,7 +33,7 @@ class Dinov2CLF(nn.Module):
         # Define a classification head
         self.classifier = nn.Sequential(
             nn.Dropout(dropout),
-            nn.Linear(self.hidden_size if embedding_strategy ==, nclasses)
+            nn.Linear(self.hidden_size, nclasses)
         )
 
     def forward(self, x):
@@ -44,11 +44,11 @@ class Dinov2CLF(nn.Module):
         # Global average pooling across all tokens (excluding class token)
         seq_emb = x[0][:,1:,:].mean(dim=1)  # Shape: (batch_size, hidden_size)
         
-        if embedding_strategy == "cls":
+        if self.embedding_strategy == "cls":
             pooler_output = cls_token
-        elif embedding_strategy == "seq_emb":
+        elif self.embedding_strategy == "seq_emb":
             pooler_output = seq_emb
-        elif embedding_strategy == "cls+seq_emb":
+        elif self.embedding_strategy == "cls+seq_emb":
             pooler_output = torch.cat([cls_token, seq_emb], dim=1)
 
         # Pass the pooled representation through the classification head
